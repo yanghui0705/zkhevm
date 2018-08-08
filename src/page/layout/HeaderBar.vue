@@ -44,7 +44,8 @@
 </template>
 
 <script>
-import {mapState, mapActions} from 'vuex'
+import {mapState, mapActions, mapGetters, mapMutations} from 'vuex'
+import Auth from '@/util/auth'
 
 export default {
   data() {
@@ -98,14 +99,19 @@ export default {
   },
   computed: {
     ...mapState({
-      username: state => state.user.name,
       lang: state => state.lang
-    })
+    }),
+    ...mapGetters([
+      'username'
+    ])
   },
   methods: {
     ...mapActions({
-      sysLogout: 'auth/logout',
       loadLang: 'loadLang'
+    }),
+    ...mapMutations({
+      setTokens: 'setTokens',
+      setUsername: 'setUsername'
     }),
     changeLang(val) {
       if (val === this.lang) return
@@ -126,9 +132,11 @@ export default {
       }
     },
     logout() {
-      this.sysLogout().then(() => {
-        this.$router.push('/login')
-      })
+      this.setTokens('')
+      this.setUsername('')
+      Auth.removeToken()
+      Auth.removeLoginStatus()
+      this.$router.push('/login')
     },
     editPawSubmit() {
       this.$refs.editPaw.validate((valid) => {

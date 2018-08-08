@@ -7,6 +7,7 @@ import Auth from '@/util/auth'
 import store from '../store'
 import staticRoute from './staticRoute'
 import whiteList from './whiteList'
+import {getNavList} from '../api/commonApi'
 
 var permissionList = []
 
@@ -14,25 +15,40 @@ function initRoute(router) {
   return new Promise((resolve) => {
     if (permissionList.length === 0) {
       console.log('没有权限数据，正在获取')
-      store.dispatch('auth/getNavList').then(() => {
-        store.dispatch('auth/getPermissionList').then((res) => {
-          console.log('权限列表生成完毕')
-          permissionList = res
-          res.forEach(function(v) {
-            let routeItem = router.match(v.path)
-            if (routeItem) {
-              routeItem.meta.permission = v.permission ? v.permission : []
-              routeItem.meta.name = v.name
-            }
-          })
-          resolve()
+
+      getNavList().then((res) => {
+        store.commit('setNavList', res)
+        console.log(store.getters.token)
+        console.log(store.getters.navList)
+
+        console.log('权限列表生成完毕')
+        flatNavList(store.getters.navList, permissionList)
+
+        permissionList.forEach(function(v) {
+          let routeItem = router.match(v.path)
+          if (routeItem) {
+            routeItem.meta.permission = v.permission ? v.permission : []
+            routeItem.meta.name = v.name
+          }
         })
+
+        resolve()
       })
     } else {
       console.log('已有权限数据')
       resolve()
     }
   })
+}
+
+function flatNavList(obj, list) {
+  for (let v of obj) {
+    if (v.child && v.child.length) {
+      flatNavList(v.child, list)
+    } else {
+      list.push(v)
+    }
+  }
 }
 
 NProgress.configure({showSpinner: false})
@@ -86,7 +102,7 @@ router.beforeEach((to, from, next) => {
       console.warn('当前未处于登录状态，请登录')
       next({path: '/login', replace: true})
       // 如果store中有token，同时Cookie中没有登录状态
-      if (store.state.user.token) {
+      if (store.getters.token) {
         Message({
           message: '登录超时，请重新登录'
         })

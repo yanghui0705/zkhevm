@@ -21,7 +21,7 @@ export default {
   props: ['layout'],
   computed: {
     ...mapState({
-      navList: state => state.auth.navList
+      navList: 'navList'
     }),
     defActive() {
       return this.$route.path

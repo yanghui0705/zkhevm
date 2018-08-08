@@ -21,5 +21,14 @@ export default {
   },
   setThemeColor(state, data) {
     state.theme = data
+  },
+  setTokens(state, data) {
+    state.token = data
+  },
+  setNavList(state, data) {
+    state.navList = data
+  },
+  setUsername(state, data) {
+    state.username = data
   }
 }

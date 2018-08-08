@@ -37,8 +37,9 @@
 </template>
 
 <script>
-import {mapState, mapActions} from 'vuex'
+import {mapState, mapMutations, mapGetters, mapActions} from 'vuex'
 import setTheme from '@/util/setTheme'
+import {login} from '../../api/commonApi'
 
 export default {
   data() {
@@ -70,7 +71,10 @@ export default {
     ...mapState({
       lang: state => state.lang,
       theme: state => state.theme
-    })
+    }),
+    ...mapGetters([
+      'token'
+    ])
   },
   watch: {
     'captcha.show'(val) {
@@ -83,17 +87,22 @@ export default {
   },
   methods: {
     ...mapActions({
-      login: 'auth/loginByEmail',
       loadLang: 'loadLang'
     }),
+    ...mapMutations({
+      setUsername: 'setUsername'
+    }),
     submitForm() {
+      console.log(this.token)
+
       this.$refs.loginForm.validate((valid) => {
         if (valid) {
-          this.login({
+          login({
             name: this.loginForm.name,
             password: this.loginForm.password
           }).then(res => {
             if (res.login) {
+              this.setUsername(res.name)
               this.$router.push('home')
             } else {
               this.sysMsg = res.message

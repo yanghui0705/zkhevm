@@ -7,6 +7,8 @@
 <script>
 import setTheme from '@/util/setTheme'
 import Cookie from 'js-cookie'
+import {getToken} from './api/commonApi'
+import {mapMutations} from 'vuex'
 
 export default {
   // TODO: 全局状态加载及变更。请根据实际情况改写
@@ -14,7 +16,22 @@ export default {
     // 首次加载/刷新时判断当前是否在登录状态
     if (Cookie.get('isLogin')) {
       console.log('重新登录')
-      this.$store.dispatch('auth/relogin')
+
+      let token = Cookie.get('token')
+      let userName = Cookie.get('userName')
+
+      if (!token) {
+        getToken().then(res => {
+          this.setTokens(res.token)
+        })
+      } else {
+        this.setTokens(token)
+      }
+
+      // 刷新/关闭浏览器再进入时获取用户名
+      Cookie.set('userName', userName, {
+        expires: 365
+      })
     }
     // 加载默认语言包
     let defLang = Cookie.get('lang') || this.$i18n.locale
@@ -25,6 +42,11 @@ export default {
     this.$nextTick(() => {
       setTheme('theme-dark')
       this.$store.commit('setThemeColor', 'theme-dark')
+    })
+  },
+  methods: {
+    ...mapMutations({
+      setTokens: 'setTokens'
     })
   }
 }
