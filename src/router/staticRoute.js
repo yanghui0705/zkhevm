@@ -124,6 +124,10 @@ const staticRoute = [
       {
         path: '',
         component: () => import('../page/zkhtest/indexzqh')
+      },
+      {
+        path: 'add',
+        component: () => import('../page/zkhtest/add')
       }
     ]
   },

@@ -3,16 +3,17 @@
     <app-title title="测试"></app-title>
     <!-- 搜索 -->{{tableData.condition}}
     <div class="sys-search">
-      <el-form :inline="true">
-        <el-form-item v-for="(item,index) in tableData.condition" :key="index" v-if="item.conditionType === 'text'">
-          <el-input v-model="item.value" :placeholder="item.name" size="small"></el-input>
-        </el-form-item>
-        <el-form-item v-for="(item,index) in tableData.condition" :key="index" v-if="item.conditionType === 'date'">
-          <el-date-picker v-model="item.value" type="date" size="small" value-format="yyyy-MM-dd" :placeholder="item.name">
+      <el-form :inline="true" ref="form">
+        <el-form-item v-for="(item,index) in tableData.condition" :key="index">
+          <el-input v-model="item.value" v-if="item.conditionType === 'text'" :placeholder="item.name" size="small"></el-input>
+          <el-date-picker v-model="item.value" v-if="item.conditionType === 'date'" type="date" size="small"
+                          value-format="yyyy-MM-dd" :placeholder="item.name">
           </el-date-picker>
-        </el-form-item>
-        <el-form-item v-for="(item,index) in tableData.condition" :key="index" v-if="item.conditionType === 'select'">
-          <el-select v-model="item.value" clearable :placeholder="item.name" size="small">
+          <el-date-picker v-model="item.value" v-if="item.conditionType === 'dateRange'" type="daterange" size="small"
+                          range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"
+                          value-format="yyyy-MM-dd" :placeholder="item.name">
+          </el-date-picker>
+          <el-select v-model="item.value" clearable :placeholder="item.name" size="small" v-if="item.conditionType === 'select'">
             <el-option
               v-for="i in item.option"
               :key="i.value"
@@ -21,17 +22,16 @@
             </el-option>
           </el-select>
         </el-form-item>
-
         <el-form-item>
           <el-button type="primary" size="small" @click="search">查询</el-button>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" size="small">重置</el-button>
+          <el-button type="primary" size="small" @click="resetForm('form')">重置</el-button>
         </el-form-item>
       </el-form>
     </div>
     <div class="sys-toolbar left">
-      <el-button type="primary" size="small">新增</el-button>
+      <el-button type="primary" size="small" @click="toAddPage">新增</el-button>
       <el-button type="primary" size="small">修改</el-button>
     </div>
     <!-- 表格体 -->
@@ -91,13 +91,16 @@ export default {
     },
     getTableDataParam() {
       let c = this.tableData.condition.map(item => {
-        return {name: item.key, value: item.value ? item.value : ''}
+        if (item.value) {
+          return {name: item.key, value: item.value ? item.value : ''}
+        } else {
+          return {}
+        }
       })
-      console.log(c)
 
       return {
         'param': {
-          'condition': '',
+          'condition': c,
           'orderName': this.sortName,
           'orderType': this.sortValue,
           'pageInfo': {
@@ -219,6 +222,12 @@ export default {
         }
       }
       return formatValue
+    },
+    toAddPage() {
+      this.$router.push('zkhtest/add')
+    },
+    resetForm(formName) {
+      this.$refs[formName].resetFields()
     }
   }
 }

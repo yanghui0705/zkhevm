@@ -84,6 +84,10 @@ var data = [
   {
     path: '/zkhtest',
     name: '测试页面'
+  },
+  {
+    path: '/zkhtest/add',
+    name: 'add'
   }
 ]
 
