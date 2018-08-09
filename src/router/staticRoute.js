@@ -118,6 +118,16 @@ const staticRoute = [
     ]
   },
   {
+    path: '/zkhtest',
+    component: Layout,
+    children: [
+      {
+        path: '',
+        component: () => import('../page/zkhtest/indexzqh')
+      }
+    ]
+  },
+  {
     path: '*',
     redirect: '/error/404'
   }

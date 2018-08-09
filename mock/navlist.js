@@ -80,6 +80,10 @@ var data = [
   {
     path: '/theme',
     name: '主题切换'
+  },
+  {
+    path: '/zkhtest',
+    name: '测试页面'
   }
 ]
 

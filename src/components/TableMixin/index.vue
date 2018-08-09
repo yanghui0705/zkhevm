@@ -2,20 +2,10 @@
   <div class="sys-table">
     <slot></slot>
     <div class="sys-table-pagination">
-      <template v-if="pagination">
-        <el-pagination
-          :layout="pageLayout"
-          :total="paginationTotal"
-          :page-size="pageSize"
-          @size-change="sizeChange"
-          @current-change="pageChange"
-          :class="align"
-        >
-        </el-pagination>
-      </template>
-      <template v-else>
-        <slot name="pagination"></slot>
-      </template>
+      <el-pagination :current-page="pageNum" :page-size="pageSize" :page-sizes="pageSizes" :total="total"
+                     @size-change="handleSizeChange" @current-change="handleCurrentChange"
+                     :layout="pageLayout" :class="align">
+      </el-pagination>
     </div>
   </div>
 </template>
@@ -24,35 +14,42 @@
 export default {
   name: 'TableMixin',
   props: {
-    pagination: Boolean,
-    paginationAlign: String,
-    pageSize: {
-      type: Number,
-      default: function() {
-        return 10
-      }
-    },
-    paginationTotal: {
-      type: Number,
-      default: function() {
-        return 10
-      }
-    },
-    sizeChange: {
-      type: Function,
-      default: function() {
-        return null
-      }
-    },
-    pageChange: {
-      type: Function,
-      default: function() {
-        return null
-      }
+    paginationAlign: {
+      type: String,
+      default: 'right'
     },
     pageLayout: {
+      type: String,
+      default: 'total, sizes, prev, pager, next, jumper'
+    },
+    pageSize: {
+      type: Number,
+      default: 10
+    },
+    pageSizes: {
+      type: Array,
       default: function() {
-        return 'total, sizes, prev, pager, next, jumper'
+        return [5, 10, 20]
+      }
+    },
+    total: {
+      type: Number,
+      default: 10
+    },
+    pageNum: {
+      type: Number,
+      default: 1
+    },
+    handleSizeChange: {
+      type: Function,
+      default: function() {
+        return null
+      }
+    },
+    handleCurrentChange: {
+      type: Function,
+      default: function() {
+        return null
       }
     }
   },

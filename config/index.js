@@ -10,7 +10,16 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
-    proxyTable: {},
+    proxyTable: {
+      '/proxy': {
+        target: 'http://118.126.102.248:8888',// 请换成你的地址
+        // target: 'http://172.17.1.152:8062/api/evm-inventory',// 请换成你的地址
+        changeOrigin: true,
+        pathRewrite: {
+          '^/proxy': ''
+        }
+      }
+    },
 
     // Various Dev Server settings
     host: '0.0.0.0', // can be overwritten by process.env.HOST
