@@ -33,5 +33,14 @@ export default {
   },
   setEditData(state, data) {
     state.editData = data
+  },
+  setCachePage(state, data) {
+    state.cachePage = data
+  },
+  setOpenedPageList(state, data) {
+    state.openedPageList = data
+  },
+  setCachedPageName(state, data) {
+    state.cachedPageName = data
   }
 }

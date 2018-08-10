@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import vuexModules from './modules'
+// import vuexModules from './modules'
 
 import state from './state'
 import mutations from './mutations'
@@ -17,7 +17,7 @@ export default new Vuex.Store({
   mutations,
   getters,
   actions,
-  modules: vuexModules,
+  // modules: vuexModules,
   strict: debug,
   plugins: debug ? [createLogger()] : []
 })

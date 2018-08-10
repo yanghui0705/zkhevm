@@ -1,10 +1,6 @@
 <template>
   <div class="sys-page">
     <app-title title="测试"></app-title>
-    <!-- 搜索 -->{{tableData.condition}}
-    <br/>
-    {{searchForm}}{{ $route.params.id }}
-    <br/>
     <div class="sys-search">
       <el-form :model="searchForm" :inline="true" ref="searchForm">
         <el-form-item v-for="(item,index) in tableData.condition" :key="index" :prop="item.key">
@@ -35,7 +31,7 @@
       <el-button type="primary" size="small" @click="toAddPage">新增</el-button>
     </div>
     <!-- 表格体 -->
-    <table-mixin :pageSize="pageSize" :pageNum="pageNum" :total="total"
+    <table-mixin :pageSize="pageSize" :pageNum="pageNum" :total="total" :pageSizes="pageSizes"
                  :handleSizeChange="handleSizeChange" :handleCurrentChange="handleCurrentChange">
       <el-table v-loading="tableData.loading" :data="tableData.body" border stripe
                 :header-row-class-name="tableHeaderClassName" @sort-change="handleSortChange"
@@ -60,7 +56,7 @@ import {tableDataMixin} from '../../common/js/mixin'
 import {mapMutations} from 'vuex'
 
 export default {
-  name: 'themeChange',
+  name: 'zkhtestlist',
   mixins: [tableDataMixin],
   data() {
     return {
@@ -69,6 +65,7 @@ export default {
       },
       pageNum: 1,
       pageSize: 10,
+      pageSizes: [],
       total: 0,
       sortName: '',
       sortValue: '',
@@ -145,6 +142,9 @@ export default {
         }
       }
       this.tableData.head = head
+      // 设置分页参数
+      this.pageSizes = res.obj.pageInfo.pageNums.split(',')
+      this.pageSize = res.obj.pageInfo.pageSize
     },
     dealCondition(res) {
       let data = res.obj.columns

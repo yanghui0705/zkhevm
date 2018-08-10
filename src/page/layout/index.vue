@@ -27,14 +27,18 @@
 import HeaderBar from './HeaderBar'
 import NavBar from './NavBar'
 import TagNav from './TagNav'
+import {mapGetters} from 'vuex'
 
 export default {
   computed: {
+    ...mapGetters([
+      'cachedPageName'
+    ]),
     layout() {
       return this.$store.state.navbarPosition
     },
     tagNavList() {
-      return this.$store.state.tagNav.cachedPageName
+      return this.cachedPageName
     }
   },
   components: {

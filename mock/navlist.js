@@ -82,11 +82,11 @@ var data = [
     name: '主题切换'
   },
   {
-    path: '/zkhtest',
+    path: '/add/vendingFactory',
     name: '测试页面'
   },
   {
-    path: '/zkhtest/add',
+    path: '/list/vendingFactory',
     name: 'add'
   }
 ]

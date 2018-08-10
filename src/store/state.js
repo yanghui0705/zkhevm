@@ -12,5 +12,11 @@ export default {
   token: '',
   navList: [],
   username: '',
-  editData: {}
+  editData: {},
+  // 是否要缓存页面，默认不缓存
+  cachePage: false,
+  // 已经打开的页面
+  openedPageList: [],
+  // 缓存的页面
+  cachedPageName: []
 }
