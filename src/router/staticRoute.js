@@ -118,16 +118,22 @@ const staticRoute = [
     ]
   },
   {
-    path: '/zkhtest',
+    path: '/add',
     component: Layout,
     children: [
       {
-        path: '',
-        component: () => import('../page/zkhtest/indexzqh')
-      },
-      {
-        path: 'add',
+        path: ':id',
         component: () => import('../page/zkhtest/add')
+      }
+    ]
+  },
+  {
+    path: '/list',
+    component: Layout,
+    children: [
+      {
+        path: ':id',
+        component: () => import('../page/zkhtest/list')
       }
     ]
   },

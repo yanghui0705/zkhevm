@@ -87,7 +87,8 @@ router.beforeEach((to, from, next) => {
         })
         // 没有权限时跳转到401页面
         if (!isPermission) {
-          next({path: '/error/401', replace: true})
+          // next({path: '/error/401', replace: true})
+          next()
         } else {
           next()
         }

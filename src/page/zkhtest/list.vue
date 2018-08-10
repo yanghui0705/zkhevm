@@ -2,18 +2,21 @@
   <div class="sys-page">
     <app-title title="测试"></app-title>
     <!-- 搜索 -->{{tableData.condition}}
+    <br/>
+    {{searchForm}}{{ $route.params.id }}
+    <br/>
     <div class="sys-search">
-      <el-form :inline="true" ref="form">
-        <el-form-item v-for="(item,index) in tableData.condition" :key="index">
-          <el-input v-model="item.value" v-if="item.conditionType === 'text'" :placeholder="item.name" size="small"></el-input>
-          <el-date-picker v-model="item.value" v-if="item.conditionType === 'date'" type="date" size="small"
+      <el-form :model="searchForm" :inline="true" ref="searchForm">
+        <el-form-item v-for="(item,index) in tableData.condition" :key="index" :prop="item.key">
+          <el-input v-model="searchForm[item.key]" v-if="item.conditionType === 'text'" :placeholder="item.name" size="small"></el-input>
+          <el-date-picker v-model="searchForm[item.key]" v-if="item.conditionType === 'date'" type="date" size="small"
                           value-format="yyyy-MM-dd" :placeholder="item.name">
           </el-date-picker>
-          <el-date-picker v-model="item.value" v-if="item.conditionType === 'dateRange'" type="daterange" size="small"
+          <el-date-picker v-model="searchForm[item.key]" v-if="item.conditionType === 'dateRange'" type="daterange" size="small"
                           range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"
                           value-format="yyyy-MM-dd" :placeholder="item.name">
           </el-date-picker>
-          <el-select v-model="item.value" clearable :placeholder="item.name" size="small" v-if="item.conditionType === 'select'">
+          <el-select v-model="searchForm[item.key]" clearable :placeholder="item.name" size="small" v-if="item.conditionType === 'select'">
             <el-option
               v-for="i in item.option"
               :key="i.value"
@@ -24,15 +27,12 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" size="small" @click="search">查询</el-button>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" size="small" @click="resetForm('form')">重置</el-button>
+          <el-button size="small" @click="resetForm('searchForm')">重置</el-button>
         </el-form-item>
       </el-form>
     </div>
     <div class="sys-toolbar left">
       <el-button type="primary" size="small" @click="toAddPage">新增</el-button>
-      <el-button type="primary" size="small">修改</el-button>
     </div>
     <!-- 表格体 -->
     <table-mixin :pageSize="pageSize" :pageNum="pageNum" :total="total"
@@ -46,7 +46,8 @@
                          :key="index" show-overflow-tooltip></el-table-column>
         <el-table-column label="操作" align="center">
           <template slot-scope="scope">
-            <el-button type="text" size="small">查看详情</el-button>
+            <el-button type="text" size="small" @click="deleteOpt(scope.row)">删除</el-button>
+            <el-button type="text" size="small" @click="toEditPage(scope.row)">修改</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -56,12 +57,16 @@
 
 <script>
 import {tableDataMixin} from '../../common/js/mixin'
+import {mapMutations} from 'vuex'
 
 export default {
   name: 'themeChange',
   mixins: [tableDataMixin],
   data() {
     return {
+      serviceId: this.$route.params.id,
+      searchForm: {
+      },
       pageNum: 1,
       pageSize: 10,
       total: 0,
@@ -84,30 +89,27 @@ export default {
     getTableCfgParam() {
       return {
         'param': {
-          'serviceId': 'vendingFactory',
+          'serviceId': this.serviceId,
           'timestamp': ''
         }
       }
     },
     getTableDataParam() {
-      let c = this.tableData.condition.map(item => {
-        if (item.value) {
-          return {name: item.key, value: item.value ? item.value : ''}
-        } else {
-          return {}
-        }
-      })
+      let columns = []
+      for (let key in this.searchForm) {
+        columns.push({name: key, value: this.searchForm[key]})
+      }
 
       return {
         'param': {
-          'condition': c,
+          'condition': columns,
           'orderName': this.sortName,
           'orderType': this.sortValue,
           'pageInfo': {
             'pageNum': this.pageNum,
             'pageSize': this.pageSize
           },
-          'serviceId': 'vendingFactory',
+          'serviceId': this.serviceId,
           'timestamp': '',
           'sign': ''
         }
@@ -125,12 +127,9 @@ export default {
         },
         data: this.getTableCfgParam
       }).then(res => {
-        this.tableData.loading = false
         this.dealHead(res)
         this.dealCondition(res)
         this.dealOption(res)
-      }).catch(err => {
-        this.$message.error(`获取数据失败，失败码：${err.response.status}`)
       })
     },
     dealHead(res) {
@@ -192,6 +191,7 @@ export default {
       this.tableData.option = head
     },
     getTableData() {
+      this.tableData.loading = true
       this.$axios({
         url: 'baseController/queryBaseDataByParam',
         method: 'post',
@@ -202,8 +202,6 @@ export default {
         data: this.getTableDataParam
       }).then(res => {
         this.dealTableResponse(res)
-      }).catch(err => {
-        this.$message.error(`获取数据失败，失败码：${err.response.status}`)
       })
     },
     formatter(row, column, cellValue, index) {
@@ -224,11 +222,60 @@ export default {
       return formatValue
     },
     toAddPage() {
-      this.$router.push('zkhtest/add')
+      this.setEditData({})
+      this.$router.push('/add/' + this.serviceId)
+    },
+    toEditPage(row) {
+      this.setEditData(row)
+      this.$router.push('/add/' + this.serviceId)
     },
     resetForm(formName) {
       this.$refs[formName].resetFields()
-    }
+    },
+    deleteOpt(row) {
+      this.$confirm('确定删除?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.deleteById(row.id)
+      }).catch(() => {
+        this.$message.info('已取消删除')
+      })
+    },
+    deleteById(id) {
+      let columns = []
+      columns.push({name: 'id', value: id})
+
+      let param = {
+        'param': {
+          'condition': columns,
+          'serviceId': this.serviceId,
+          'timestamp': '',
+          'sign': ''
+        }
+      }
+
+      this.$axios({
+        url: 'baseController/deleteBaseDataByParam',
+        method: 'post',
+        baseURL: '/proxy',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        data: param
+      }).then(res => {
+        if (res.success) {
+          this.$message.success('操作成功')
+          this.getTableData()
+        } else {
+          this.$message.error(res.msg)
+        }
+      })
+    },
+    ...mapMutations({
+      setEditData: 'setEditData'
+    })
   }
 }
 </script>

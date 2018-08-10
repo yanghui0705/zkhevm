@@ -9,7 +9,7 @@
         <el-form-item v-for="(item,index) in tableData.condition" :key="index" :label="item.name" :prop="item.key">
           <el-input v-model="ruleForm[item.key]" v-if="item.conditionType === 'text'" :placeholder="item.name" size="small"></el-input>
           <el-date-picker v-model="ruleForm[item.key]" v-if="item.conditionType === 'date'" type="date" size="small"
-                          :placeholder="item.name">
+                          value-format="yyyy-MM-dd" :placeholder="item.name">
           </el-date-picker>
           <el-date-picker v-model="ruleForm[item.key]" v-if="item.conditionType === 'dateRange'" type="daterange" size="small"
                           range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"
@@ -34,9 +34,12 @@
   </div>
 </template>
 <script>
+import {mapGetters} from 'vuex'
+
 export default {
   data() {
     return {
+      serviceId: this.$route.params.id,
       ruleForm: {
       },
       rules: {
@@ -46,9 +49,6 @@ export default {
         ],
         delFlag: [
           { required: true, message: '请选择活动区域', trigger: 'change' }
-        ],
-        creatTime: [
-          { type: 'date', required: true, message: '请选择日期', trigger: 'change' }
         ]
       },
       pageNum: 1,
@@ -66,10 +66,13 @@ export default {
     }
   },
   computed: {
+    ...mapGetters([
+      'editData'
+    ]),
     getTableCfgParam() {
       return {
         'param': {
-          'serviceId': 'vendingFactory',
+          'serviceId': this.serviceId,
           'timestamp': ''
         }
       }
@@ -82,7 +85,7 @@ export default {
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          this.save()
+          this.save(this.ruleForm.id)
         } else {
           console.log('error submit!!')
           return false
@@ -102,16 +105,19 @@ export default {
         },
         data: this.getTableCfgParam
       }).then(res => {
-        this.dealCondition(res)
-      }).catch(err => {
-        this.$message.error(`获取数据失败，失败码：${err.response.status}`)
+        if (this.editData.id) {
+          this.ruleForm = this.editData
+          this.dealCondition(res, 'isUpdate')
+        } else {
+          this.dealCondition(res, 'isAdd')
+        }
       })
     },
-    dealCondition(res) {
+    dealCondition(res, flag) {
       let data = res.obj.columns
       let head = []
       for (let i = 0; i < data.length; i++) {
-        if (data[i].isAdd) {
+        if (data[i][flag]) {
           let obj = {
             key: data[i].fieldName,
             name: data[i].fieldDesc,
@@ -130,24 +136,31 @@ export default {
       }
       this.tableData.condition = head
     },
-    save() {
+    save(id) {
+      let url = 'baseController/insertBaseDataByParam'
+      let condition = []
+      if (id) {
+        url = 'baseController/updateBaseDataByParam'
+        condition.push({name: 'id', value: id})
+      }
+
       let columns = []
       for (let key in this.ruleForm) {
         columns.push({name: key, value: this.ruleForm[key]})
       }
-      console.log(columns)
 
       let param = {
         'param': {
           'columns': columns,
-          'serviceId': 'vendingFactory',
+          'condition': condition,
+          'serviceId': this.serviceId,
           'timestamp': '',
           'sign': ''
         }
       }
 
       this.$axios({
-        url: 'baseController/insertBaseDataByParam',
+        url: url,
         method: 'post',
         baseURL: '/proxy',
         headers: {
@@ -155,9 +168,12 @@ export default {
         },
         data: param
       }).then(res => {
-        this.dealCondition(res)
-      }).catch(err => {
-        this.$message.error(`获取数据失败，失败码：${err.response.status}`)
+        if (res.success) {
+          this.$message.success('操作成功')
+          this.$router.push('/list/' + this.serviceId)
+        } else {
+          this.$message.error(res.msg)
+        }
       })
     }
   }

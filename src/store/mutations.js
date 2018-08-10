@@ -30,5 +30,8 @@ export default {
   },
   setUsername(state, data) {
     state.username = data
+  },
+  setEditData(state, data) {
+    state.editData = data
   }
 }
