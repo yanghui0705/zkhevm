@@ -1,6 +1,6 @@
 <template>
   <div class="sys-page">
-    <app-title title="测试"></app-title>
+    <app-title title="编辑页面"></app-title>
     <div class="z-form">
       <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
         <el-form-item v-for="(item,index) in tableData.condition" :key="index" :label="item.name" :prop="item.key">
@@ -61,6 +61,13 @@ export default {
         option: [],
         condition: []
       }
+    }
+  },
+  watch: {
+    '$route'(to, from) {
+      this.serviceId = this.$route.params.id
+
+      this.getTableCfg()
     }
   },
   computed: {

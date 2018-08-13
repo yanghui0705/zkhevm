@@ -1,6 +1,6 @@
 <template>
   <div class="sys-page">
-    <app-title title="测试"></app-title>
+    <app-title title="列表页面"></app-title>
     <div class="sys-search">
       <el-form :model="searchForm" :inline="true" ref="searchForm">
         <el-form-item v-for="(item,index) in tableData.condition" :key="index" :prop="item.key">
@@ -81,6 +81,14 @@ export default {
   mounted() {
     this.getTableCfg()
     this.getTableData()
+  },
+  watch: {
+    '$route'(to, from) {
+      this.serviceId = this.$route.params.id
+
+      this.getTableCfg()
+      this.getTableData()
+    }
   },
   computed: {
     getTableCfgParam() {
